@@ -1,0 +1,93 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEACON Auth Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1, h2 { color: #333; }
+    ul { list-style-type: none; padding: 0; }
+    li { margin: 10px 0; }
+    form { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; }
+    input { width: 100%; padding: 8px; margin-bottom: 10px; }
+    button { padding: 10px 15px; background-color: #007BFF; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .success, .error { margin-top: 10px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>BEACON Auth Dashboard</h1>
+  <h2>API Links</h2>
+  <ul id="api-links">
+    <!-- API Links will be inserted here -->
+  </ul>
+  <h2>Create API Link</h2>
+  <form id="api-link-form">
+    <label>Name:</label>
+    <input type="text" id="name" required>
+    <label>Callback URL:</label>
+    <input type="text" id="callback-url" required>
+    <button type="submit">Create</button>
+    <div id="form-messages" class="success"></div>
+  </form>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiLinksContainer = document.getElementById('api-links');
+      const form = document.getElementById('api-link-form');
+      const formMessages = document.getElementById('form-messages');
+
+      // Mock API Links for demonstration purposes
+      let apiLinks = [
+        { _id: '1', name: 'Example Link', callbackUrl: 'https://en9jx5l5x0q9u.x.pipedream.net' }
+      ];
+
+      // Fetch API Links
+      const fetchApiLinks = () => {
+        apiLinksContainer.innerHTML = '';
+        apiLinks.forEach(link => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span>${link.name}</span>
+            <a href="auth.html?id=${link._id}" target="_blank">Authenticate</a>
+          `;
+          apiLinksContainer.appendChild(li);
+        });
+      };
+
+      fetchApiLinks();
+
+      // Handle Form Submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        formMessages.textContent = '';
+        const name = document.getElementById('name').value;
+        const callbackUrl = document.getElementById('callback-url').value;
+
+        try {
+          // For demonstration, we'll just add the link to the mock array
+          const newLink = {
+            _id: (apiLinks.length + 1).toString(),
+            name,
+            callbackUrl
+          };
+          apiLinks.push(newLink);
+          formMessages.textContent = `API link created: ${newLink.name}`;
+          formMessages.className = 'success';
+          document.getElementById('name').value = '';
+          document.getElementById('callback-url').value = '';
+          fetchApiLinks();
+        } catch (error) {
+          console.error('Create API link error:', error);
+          formMessages.textContent = 'Failed to create API link';
+          formMessages.className = 'error';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
