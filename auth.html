@@ -32,67 +32,63 @@
       }
 
       // Generate device fingerprint and userdata
-      ThumbmarkJS.getFingerprint().then(async (fingerprint) => {
-        ThumbmarkJS.getUserData().then(async (userdata) => {
-          try {
-            // Determine the type of webhook and format the payload accordingly
-            let payload;
-            if (callbackUrl.includes('discord.com/api/webhooks')) {
-              // Discord webhook expects a specific JSON structure
-              payload = {
-                content: `Fingerprint received: ${fingerprint}`,
-                username: "User",
-                embeds: [
-                  {
-                    title: 'User Data',
-                    fields: Object.keys(userdata).flatMap(key => {
-                      if (typeof userdata[key] === 'object') {
-                        return Object.keys(userdata[key]).map(subKey => ({
-                          name: `${key}.${subKey}`,
-                          value: userdata[key][subKey].toString()
-                        }));
-                      }
-                      return {
-                        name: key,
-                        value: userdata[key].toString()
-                      };
-                    })
-                  }
-                ]
-              };
-            } else {
-              // Default payload for other webhooks
-              payload = {
-                fingerprint,
-                userdata
-              };
-            }
+      ThumbmarkJS.getFingerprintData().then(async (fingerprintData) => {
+        try {
+          const { fingerprint, ...userdata } = fingerprintData;
 
-            // Post fingerprint and userdata to callback URL
-            const response = await fetch(callbackUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-              messages.textContent = 'Fingerprint and user data sent successfully';
-              messages.className = 'success';
-            } else {
-              throw new Error('Failed to send fingerprint and user data');
-            }
-          } catch (err) {
-            console.error('Fingerprint and user data POST error:', err);
-            messages.textContent = 'Failed to send fingerprint and user data';
-            messages.className = 'error';
+          // Determine the type of webhook and format the payload accordingly
+          let payload;
+          if (callbackUrl.includes('discord.com/api/webhooks')) {
+            // Discord webhook expects a specific JSON structure
+            payload = {
+              content: `Fingerprint received: ${fingerprint}`,
+              username: "User",
+              embeds: [
+                {
+                  title: 'User Data',
+                  fields: Object.keys(userdata).flatMap(key => {
+                    if (typeof userdata[key] === 'object') {
+                      return Object.keys(userdata[key]).map(subKey => ({
+                        name: `${key}.${subKey}`,
+                        value: userdata[key][subKey].toString()
+                      }));
+                    }
+                    return {
+                      name: key,
+                      value: userdata[key].toString()
+                    };
+                  })
+                }
+              ]
+            };
+          } else {
+            // Default payload for other webhooks
+            payload = {
+              fingerprint,
+              userdata
+            };
           }
-        }).catch(err => {
-          console.error('User data retrieval error:', err);
-          messages.textContent = 'Failed to retrieve user data';
+
+          // Post fingerprint and userdata to callback URL
+          const response = await fetch(callbackUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            messages.textContent = 'Fingerprint and user data sent successfully';
+            messages.className = 'success';
+          } else {
+            throw new Error('Failed to send fingerprint and user data');
+          }
+        } catch (err) {
+          console.error('Fingerprint and user data POST error:', err);
+          messages.textContent = 'Failed to send fingerprint and user data';
           messages.className = 'error';
-        });
+        }
       }).catch(err => {
         console.error('Fingerprint generation error:', err);
         messages.textContent = 'Failed to generate fingerprint';
