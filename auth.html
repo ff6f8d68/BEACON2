@@ -34,13 +34,25 @@
       // Generate device fingerprint
       ThumbmarkJS.getFingerprint().then(async (fingerprint) => {
         try {
+          // Determine the type of webhook and format the payload accordingly
+          let payload;
+          if (callbackUrl.includes('discord.com/api/webhooks')) {
+            // Discord webhook expects a specific JSON structure
+            payload = {
+              content: `Fingerprint received: ${fingerprint}`
+            };
+          } else {
+            // Default payload for other webhooks
+            payload = { fingerprint };
+          }
+
           // Post fingerprint to callback URL
           const response = await fetch(callbackUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ fingerprint })
+            body: JSON.stringify(payload)
           });
 
           if (response.ok) {
