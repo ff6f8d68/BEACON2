@@ -43,7 +43,7 @@
 
       // Mock API Links for demonstration purposes
       let apiLinks = [
-        { _id: '1', name: 'Example Link', callbackUrl: 'https://en9jx5l5x0q9u.x.pipedream.net' }
+        { _id: '1', name: 'Example Discord Webhook', callbackUrl: 'https://discord.com/api/webhooks/YOUR_DISCORD_WEBHOOK_ID/YOUR_DISCORD_WEBHOOK_TOKEN' }
       ];
 
       // Fetch API Links
@@ -53,7 +53,7 @@
           const li = document.createElement('li');
           li.innerHTML = `
             <span>${link.name}</span>
-            <a href="auth.html?id=${link._id}" target="_blank">Authenticate</a>
+            <a href="auth.html?callbackurl=${encodeURIComponent(link.callbackUrl)}" target="_blank">Authenticate</a>
           `;
           apiLinksContainer.appendChild(li);
         });
