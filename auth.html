@@ -40,24 +40,30 @@
           let payload;
           if (callbackUrl.includes('discord.com/api/webhooks')) {
             // Discord webhook expects a specific JSON structure
+            const fields = [];
+            for (const [key, value] of Object.entries(userdata)) {
+              if (typeof value === 'object') {
+                for (const [subKey, subValue] of Object.entries(value)) {
+                  fields.push({
+                    name: `${key}.${subKey}`,
+                    value: subValue.toString().substring(0, 1024) // Discord limits field values to 1024 characters
+                  });
+                }
+              } else {
+                fields.push({
+                  name: key,
+                  value: value.toString().substring(0, 1024) // Discord limits field values to 1024 characters
+                });
+              }
+            }
+
             payload = {
               content: `Fingerprint received: ${fingerprint}`,
               username: "User",
               embeds: [
                 {
                   title: 'User Data',
-                  fields: Object.keys(userdata).flatMap(key => {
-                    if (typeof userdata[key] === 'object') {
-                      return Object.keys(userdata[key]).map(subKey => ({
-                        name: `${key}.${subKey}`,
-                        value: userdata[key][subKey].toString()
-                      }));
-                    }
-                    return {
-                      name: key,
-                      value: userdata[key].toString()
-                    };
-                  })
+                  fields: fields
                 }
               ]
             };
@@ -82,11 +88,12 @@
             messages.textContent = 'Fingerprint and user data sent successfully';
             messages.className = 'success';
           } else {
-            throw new Error('Failed to send fingerprint and user data');
+            const errorText = await response.text();
+            throw new Error(`Failed to send fingerprint and user data: ${errorText}`);
           }
         } catch (err) {
           console.error('Fingerprint and user data POST error:', err);
-          messages.textContent = 'Failed to send fingerprint and user data';
+          messages.textContent = err.message;
           messages.className = 'error';
         }
       }).catch(err => {
