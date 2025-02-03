@@ -21,30 +21,15 @@
     document.addEventListener('DOMContentLoaded', () => {
       const messages = document.getElementById('messages');
 
-      // Get link ID from query parameters
+      // Get callback URL from query parameters
       const urlParams = new URLSearchParams(window.location.search);
-      const linkId = urlParams.get('id');
+      const callbackUrl = urlParams.get('callbackurl');
 
-      if (!linkId) {
-        messages.textContent = 'API link ID not provided';
+      if (!callbackUrl) {
+        messages.textContent = 'Callback URL not provided';
         messages.className = 'error';
         return;
       }
-
-      // Mock API Links for demonstration purposes
-      const apiLinks = [
-        { _id: '1', name: 'Example Link', callbackUrl: 'https://en9jx5l5x0q9u.x.pipedream.net' }
-      ];
-
-      const link = apiLinks.find(l => l._id === linkId);
-
-      if (!link) {
-        messages.textContent = 'API link not found';
-        messages.className = 'error';
-        return;
-      }
-
-      const callbackUrl = link.callbackUrl;
 
       // Generate device fingerprint
       ThumbmarkJS.getFingerprint().then(async (fingerprint) => {
