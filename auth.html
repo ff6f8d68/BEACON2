@@ -1,0 +1,80 @@
+<!-- auth.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEACON Auth</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    .success, .error { margin-top: 10px; }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>BEACON Auth</h1>
+  <div id="messages" class="success"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@thumbmarkjs/thumbmarkjs/dist/thumbmark.umd.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const messages = document.getElementById('messages');
+
+      // Get link ID from query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const linkId = urlParams.get('id');
+
+      if (!linkId) {
+        messages.textContent = 'API link ID not provided';
+        messages.className = 'error';
+        return;
+      }
+
+      // Mock API Links for demonstration purposes
+      const apiLinks = [
+        { _id: '1', name: 'Example Link', callbackUrl: 'https://en9jx5l5x0q9u.x.pipedream.net' }
+      ];
+
+      const link = apiLinks.find(l => l._id === linkId);
+
+      if (!link) {
+        messages.textContent = 'API link not found';
+        messages.className = 'error';
+        return;
+      }
+
+      const callbackUrl = link.callbackUrl;
+
+      // Generate device fingerprint
+      ThumbmarkJS.getFingerprint().then(async (fingerprint) => {
+        try {
+          // Post fingerprint to callback URL
+          const response = await fetch(callbackUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ fingerprint })
+          });
+
+          if (response.ok) {
+            messages.textContent = 'Fingerprint sent successfully';
+            messages.className = 'success';
+          } else {
+            throw new Error('Failed to send fingerprint');
+          }
+        } catch (err) {
+          console.error('Fingerprint POST error:', err);
+          messages.textContent = 'Failed to send fingerprint';
+          messages.className = 'error';
+        }
+      }).catch(err => {
+        console.error('Fingerprint generation error:', err);
+        messages.textContent = 'Failed to generate fingerprint';
+        messages.className = 'error';
+      });
+    });
+  </script>
+</body>
+</html>
