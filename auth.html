@@ -34,7 +34,19 @@
       // Generate device fingerprint and userdata
       ThumbmarkJS.getFingerprintData().then(async (fingerprintData) => {
         try {
-          const { fingerprint, ...userdata } = fingerprintData;
+          // Ensure fingerprintData is an object
+          if (typeof fingerprintData !== 'object' || fingerprintData === null) {
+            throw new Error('Invalid fingerprint data');
+          }
+
+          // Extract fingerprint and userdata
+          const fingerprint = fingerprintData.fingerprint;
+          const userdata = fingerprintData.userdata;
+
+          // Ensure fingerprint is defined
+          if (fingerprint === undefined) {
+            throw new Error('Fingerprint not generated');
+          }
 
           // Determine the type of webhook and format the payload accordingly
           let payload;
@@ -79,6 +91,9 @@
                 }
               ]
             };
+
+            // Log the fields array for debugging
+            console.log('Fields array:', fields);
           } else {
             // Default payload for other webhooks
             payload = {
